@@ -120,6 +120,15 @@ var main = function () {
 	requestAnimationFrame(main);
 };
 
+function waitForImages(){
+	if(!(bgImage && heroImage && monsterImage)){
+		requestAnimationFrame(waitForImages);
+	}
+	else{
+		requestAnimationFrame(main);
+	}
+}
+
 // Cross-browser support for requestAnimationFrame
 var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
@@ -127,4 +136,4 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 // Let's play this game!
 var then = Date.now();
 reset();
-main();
+waitForImages();
