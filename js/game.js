@@ -9,13 +9,10 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-var bgImage = null;
-var heroImage = null;
-var monsterImage = null;
-
 //info for loading images
 //name needed later for assigning to an image to the correct variable
-var images = [
+var images = null;
+var imageInfo = [
   {
     src : 'images/background.png',
     name : 'background'
@@ -90,6 +87,10 @@ var update = function (modifier) {
 
 // Draw everything
 var render = function () {
+	var bgImage = images.background;
+	var heroImage = images.hero;
+	var monsterImage = images.monster;
+
 	ctx.drawImage(bgImage, 0, 0);
 	ctx.drawImage(heroImage, hero.x, hero.y);
 	ctx.drawImage(monsterImage, monster.x, monster.y);
@@ -122,10 +123,9 @@ function loadImage(info){
     var image = new Image();
 
     image.onload  = function(){
-      resolve({
-        image : image,
-        name  : info.name
-      });
+			var object = {};
+			object[info.name] = image;
+      resolve(object);
     };
 
     image.onerror = function(){
@@ -142,23 +142,9 @@ function loadImages(images){
 	return Promise.all(images.map(loadImage));
 }
 
-//assign image to correct variable
-function setImage(image){
-  switch (image.name){
-    case 'background':
-      bgImage = image.image;
-      break;
-    case 'hero':
-      heroImage = image.image;
-      break;
-    case 'monster':
-      monsterImage = image.image;
-      break;
-  }
-}
+loadImages(imageInfo).then(images_ => {
+	images = Object.assign(...images_);
 
-loadImages(images).then(images => {
-	images.forEach(setImage);
 	// Let's play this game!
 	then = Date.now();
 	reset();
