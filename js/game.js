@@ -11,21 +11,11 @@ document.body.appendChild(canvas);
 
 //info for loading images
 //name needed later for assigning to an image to the correct variable
-var images = null;
-var imageInfo = [
-  {
-    src : 'images/background.png',
-    name : 'background'
-  },
-  {
-    src : 'images/hero.png',
-    name : 'hero'
-  },
-  {
-    src : 'images/monster.png',
-    name : 'monster'
-  }
-];
+var images = {
+	background : 'images/background.png',
+  hero : 'images/hero.png',
+	monster : 'images/monster.png'
+};
 
 // Game objects
 var hero = {
@@ -118,33 +108,40 @@ var main = function () {
 };
 
 //load an image using a Promise
-function loadImage(info){
+function loadImage(source){
   var executor = (resolve, reject) => {
     var image = new Image();
 
     image.onload  = function(){
-			var object = {};
-			object[info.name] = image;
-      resolve(object);
+      resolve(image);
     };
 
     image.onerror = function(){
 			reject(1);
 		};
 
-    image.src = info.src;
+    image.src = source;
   };
 
   return new Promise(executor);
 }
 
 function loadImages(images){
-	return Promise.all(images.map(loadImage));
+	var requests = [];
+
+	Object.entries(images).forEach(([name, source]) => {
+		var request = loadImage(source).then(image => {
+			images[name] = image;
+			return Promise.resolve();
+		});
+
+		requests.push(request);
+	});
+
+	return Promise.all(requests);
 }
 
-loadImages(imageInfo).then(images_ => {
-	images = Object.assign(...images_);
-
+loadImages(images).then(stuff => {
 	// Let's play this game!
 	then = Date.now();
 	reset();
