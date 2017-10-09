@@ -1,3 +1,7 @@
+// Cross-browser support for requestAnimationFrame
+var w = window;
+requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -5,29 +9,26 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-// Background image
-var bgReady = false;
-var bgImage = new Image();
-bgImage.onload = function () {
-	bgReady = true;
-};
-bgImage.src = "images/background.png";
+var bgImage = null;
+var heroImage = null;
+var monsterImage = null;
 
-// Hero image
-var heroReady = false;
-var heroImage = new Image();
-heroImage.onload = function () {
-	heroReady = true;
-};
-heroImage.src = "images/hero.png";
-
-// Monster image
-var monsterReady = false;
-var monsterImage = new Image();
-monsterImage.onload = function () {
-	monsterReady = true;
-};
-monsterImage.src = "images/monster.png";
+//info for loading images
+//name needed later for assigning to an image to the correct variable
+var images = [
+  {
+    src : 'images/background.png',
+    name : 'background'
+  },
+  {
+    src : 'images/hero.png',
+    name : 'hero'
+  },
+  {
+    src : 'images/monster.png',
+    name : 'monster'
+  }
+];
 
 // Game objects
 var hero = {
@@ -38,6 +39,9 @@ var monstersCaught = 0;
 
 // Handle keyboard controls
 var keysDown = {};
+
+// Keeping track of time elapsed
+var then = null;
 
 addEventListener("keydown", function (e) {
 	keysDown[e.keyCode] = true;
@@ -86,17 +90,9 @@ var update = function (modifier) {
 
 // Draw everything
 var render = function () {
-	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0);
-	}
-
-	if (heroReady) {
-		ctx.drawImage(heroImage, hero.x, hero.y);
-	}
-
-	if (monsterReady) {
-		ctx.drawImage(monsterImage, monster.x, monster.y);
-	}
+	ctx.drawImage(bgImage, 0, 0);
+	ctx.drawImage(heroImage, hero.x, hero.y);
+	ctx.drawImage(monsterImage, monster.x, monster.y);
 
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
@@ -120,20 +116,51 @@ var main = function () {
 	requestAnimationFrame(main);
 };
 
-function waitForImages(){
-	if(!(bgImage && heroImage && monsterImage)){
-		requestAnimationFrame(waitForImages);
-	}
-	else{
-		requestAnimationFrame(main);
-	}
+//load an image using a Promise
+function loadImage(info){
+  var executor = (resolve, reject) => {
+    var image = new Image();
+
+    image.onload  = function(){
+      resolve({
+        image : image,
+        name  : info.name
+      });
+    };
+
+    image.onerror = function(){
+			reject(1);
+		};
+
+    image.src = info.src;
+  };
+
+  return new Promise(executor);
 }
 
-// Cross-browser support for requestAnimationFrame
-var w = window;
-requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+function loadImages(images){
+	return Promise.all(images.map(loadImage));
+}
 
-// Let's play this game!
-var then = Date.now();
-reset();
-waitForImages();
+//assign image to correct variable
+function setImage(image){
+  switch (image.name){
+    case 'background':
+      bgImage = image.image;
+      break;
+    case 'hero':
+      heroImage = image.image;
+      break;
+    case 'monster':
+      monsterImage = image.image;
+      break;
+  }
+}
+
+loadImages(images).then(images => {
+	images.forEach(setImage);
+	// Let's play this game!
+	then = Date.now();
+	reset();
+	main();
+});
