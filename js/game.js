@@ -141,7 +141,7 @@ function loadImages(images){
 	return Promise.all(requests);
 }
 
-loadImages(images).then(stuff => {
+loadImages(images).then(() => {
 	// Let's play this game!
 	then = Date.now();
 	reset();
