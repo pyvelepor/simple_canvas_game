@@ -19,24 +19,31 @@ var images = {
 
 // Game objects
 var hero = {
+	x: null,
+	y: null,
 	speed: 256 // movement in pixels per second
 };
-var monster = {};
-var monstersCaught = 0;
 
-// Handle keyboard controls
-var keysDown = {};
+var monster = {
+	x: null,
+	y: null
+};
+
+var monstersCaught = 0;
 
 // Keeping track of time elapsed
 var then = null;
 
-addEventListener("keydown", function (e) {
-	keysDown[e.keyCode] = true;
-}, false);
+// Handle keyboard controls
+var keysDown = {};
 
-addEventListener("keyup", function (e) {
+var onKeydown = function(e){
+	keysDown[e.keyCode] = true;
+};
+
+var onKeyup = function(e){
 	delete keysDown[e.keyCode];
-}, false);
+};
 
 // Reset the game when the player catches a monster
 var reset = function () {
@@ -49,18 +56,18 @@ var reset = function () {
 };
 
 // Update game objects
-var update = function (modifier) {
+var update = function (timeElapsed) {
 	if (38 in keysDown) { // Player holding up
-		hero.y -= hero.speed * modifier;
+		hero.y -= hero.speed * timeElapsed;
 	}
 	if (40 in keysDown) { // Player holding down
-		hero.y += hero.speed * modifier;
+		hero.y += hero.speed * timeElapsed;
 	}
 	if (37 in keysDown) { // Player holding left
-		hero.x -= hero.speed * modifier;
+		hero.x -= hero.speed * timeElapsed;
 	}
 	if (39 in keysDown) { // Player holding right
-		hero.x += hero.speed * modifier;
+		hero.x += hero.speed * timeElapsed;
 	}
 
 	// Are they touching?
@@ -77,11 +84,12 @@ var update = function (modifier) {
 
 // Draw everything
 var render = function () {
-	var bgImage = images.background;
+	var backgroundImage = images.background;
 	var heroImage = images.hero;
 	var monsterImage = images.monster;
 
-	ctx.drawImage(bgImage, 0, 0);
+	// Images
+	ctx.drawImage(backgroundImage, 0, 0);
 	ctx.drawImage(heroImage, hero.x, hero.y);
 	ctx.drawImage(monsterImage, monster.x, monster.y);
 
@@ -128,6 +136,10 @@ function loadImage(source){
 
 function loadImages(images){
 	var requests = [];
+//starts the game
+var startGame = function(){
+	addEventListener("keydown", onKeydown, false);
+	addEventListener("keyup", onKeyup, false);
 
 	Object.entries(images).forEach(([name, source]) => {
 		var request = loadImage(source).then(image => {
@@ -147,3 +159,6 @@ loadImages(images).then(() => {
 	reset();
 	main();
 });
+};
+
+loadImages(images).then(startGame);
