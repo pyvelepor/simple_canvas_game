@@ -136,10 +136,6 @@ function loadImage(source){
 
 function loadImages(images){
 	var requests = [];
-//starts the game
-var startGame = function(){
-	addEventListener("keydown", onKeydown, false);
-	addEventListener("keyup", onKeyup, false);
 
 	Object.entries(images).forEach(([name, source]) => {
 		var request = loadImage(source).then(image => {
@@ -153,12 +149,15 @@ var startGame = function(){
 	return Promise.all(requests);
 }
 
-loadImages(images).then(() => {
+//starts the game
+var startGame = function(){
+	addEventListener("keydown", onKeydown, false);
+	addEventListener("keyup", onKeyup, false);
+
 	// Let's play this game!
 	then = Date.now();
 	reset();
 	main();
-});
 };
 
 loadImages(images).then(startGame);
