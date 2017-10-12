@@ -28,23 +28,15 @@ var loop = function(game) {
 	requestAnimationFrame(nextFrame);
 };
 
-var load = function(game){
-	return loadImages(game.images).then(() => {
-		return game;
-	});
-};
-
-var setup = function(game){
-	if(game.setup !== undefined){
-		game.setup();
-	}
-};
-
 var start = function(game){
-	load(game).then(game => {
+	loadImages(game.images).then(() => {
 		addEventListener("keydown", onKeydown, false);
 		addEventListener("keyup", onKeyup, false);
-		setup(game);
+
+		if(game.setup !== undefined){
+			game.setup();
+		}
+
 		loop(game);
 	});
 };
