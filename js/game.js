@@ -13,7 +13,7 @@ var onKeyup = function(e){
 };
 
 // The main game loop
-var main = function(update, render) {
+var loopGame = function(update, render) {
 	var now = Date.now();
 	var delta = now - then;
 
@@ -22,15 +22,15 @@ var main = function(update, render) {
 
 	then = now;
 
-	var advanceGame = main.bind(null, update, render);
+	var nextFrame = loopGame.bind(null, update, render);
 
 	// Request to do this again ASAP
-	requestAnimationFrame(advanceGame);
+	requestAnimationFrame(nextFrame);
 };
 
 var start = function(update, render){
 	addEventListener("keydown", onKeydown, false);
 	addEventListener("keyup", onKeyup, false);
 
-	main(update, render);
+	loopGame(update, render);
 };
