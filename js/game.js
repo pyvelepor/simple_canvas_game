@@ -13,24 +13,32 @@ var onKeyup = function(e){
 };
 
 // The main game loop
-var loopGame = function(update, render) {
+var loop = function(game) {
 	var now = Date.now();
 	var delta = now - then;
 
-	update(delta / 1000);
-	render();
+	game.update(delta / 1000);
+	game.render();
 
 	then = now;
 
-	var nextFrame = loopGame.bind(null, update, render);
+	var nextFrame = loop.bind(null, game);
 
 	// Request to do this again ASAP
 	requestAnimationFrame(nextFrame);
 };
 
-var start = function(update, render){
+var start = function(game){
 	addEventListener("keydown", onKeydown, false);
 	addEventListener("keyup", onKeyup, false);
 
-	loopGame(update, render);
+	var startGame = function(){
+		if(game.setup !== undefined){
+			game.setup();
+		}
+
+		loop(game);
+	};
+
+	loadImages(game.images).then(startGame);
 };
