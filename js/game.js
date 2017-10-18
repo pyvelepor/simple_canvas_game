@@ -37,6 +37,8 @@ var start = function(game){
 			game.setup();
 		}
 
+		then = Date.now();
+		
 		loop(game);
 	});
 };
