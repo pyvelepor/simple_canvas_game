@@ -51,6 +51,7 @@ var MonsterHunter = class {
         hero.x += hero.speed * timeElapsed;
       }
 
+      monster.x += 256 * timeElapsed;
       // Are they touching?
       if (
         hero.x <= (monster.x + 32)
