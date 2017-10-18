@@ -51,6 +51,22 @@ var MonsterHunter = class {
         hero.x += hero.speed * timeElapsed;
       }
 
+      if(monster.x < 32){
+        monster.x = 32;
+      }
+
+      if(monster.x > canvas.width - 64){
+        monster.x = 451;
+      }
+
+      if(monster.y < 32){
+        monster.y = 32;
+      }
+
+      if(monster.y > canvas.height - 64){
+        monster.y = canvas.height - 64;
+      }
+      
       // Are they touching?
       if (
         hero.x <= (monster.x + 32)
