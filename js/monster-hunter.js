@@ -21,7 +21,10 @@ var MonsterHunter = class {
 
     var monster = {
     	x: null,
-    	y: null
+    	y: null,
+      vx: 0,
+      vy: 0,
+      maxSpeed: 125,
     };
 
     var monstersCaught = 0;
@@ -34,21 +37,50 @@ var MonsterHunter = class {
     	// Throw the monster somewhere on the screen randomly
     	monster.x = 32 + (Math.random() * (canvas.width - 64));
     	monster.y = 32 + (Math.random() * (canvas.height - 64));
+
+      monster.vx = 0;
+      monster.vy = 0;
     };
 
     // Update game objects
     this.update = function(timeElapsed) {
+      var moving = false;
+
       if (38 in keysDown) { // Player holding up
         hero.y -= hero.speed * timeElapsed;
+        moving = true;
       }
       if (40 in keysDown) { // Player holding down
         hero.y += hero.speed * timeElapsed;
+        moving = true;
       }
       if (37 in keysDown) { // Player holding left
         hero.x -= hero.speed * timeElapsed;
+        moving = true;
       }
       if (39 in keysDown) { // Player holding right
         hero.x += hero.speed * timeElapsed;
+        moving = true;
+      }
+
+      var dx = monster.x - hero.x;
+      var dy = monster.y - hero.y;
+
+      var desiredVelocity = normalize(dx, dy);
+      var steeringVx = (desiredVelocity.x * monster.maxSpeed) - monster.vx;
+      var steeringVy = (desiredVelocity.y * monster.maxSpeed) - monster.vy;
+
+      if(moving){
+        monster.vx += steeringVx;
+        monster.vy += steeringVy;
+
+        monster.x += monster.vx * timeElapsed;
+        monster.y += monster.vy * timeElapsed;
+      }
+
+      else{
+        monster.vx = 0;
+        monster.vy = 0;
       }
 
       monster.x += 256 * timeElapsed;

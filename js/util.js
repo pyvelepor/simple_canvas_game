@@ -32,5 +32,13 @@ function loadImages(images){
 	return Promise.all(requests);
 }
 
+function normalize(x, y){
+  magnitude = Math.sqrt(x ** 2 + y ** 2);
+
+  return {
+    x: x / magnitude,
+    y: y / magnitude,
+  };
+}
 // Cross-browser support for requestAnimationFrame
 requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
