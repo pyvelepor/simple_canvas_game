@@ -32,12 +32,16 @@ function loadImages(images){
 	return Promise.all(requests);
 }
 
-function normalize(x, y){
-  magnitude = Math.sqrt(x ** 2 + y ** 2);
+function magnitude(u){
+  return Math.sqrt(u.x ** 2 + u.y ** 2);
+}
+
+function normalize(u){
+  var magnitude_ = magnitude(u);
 
   return {
-    x: x / magnitude,
-    y: y / magnitude,
+    x: u.x / magnitude_,
+    y: u.y / magnitude_,
   };
 }
 // Cross-browser support for requestAnimationFrame

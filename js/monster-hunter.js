@@ -25,6 +25,7 @@ var MonsterHunter = class {
       vx: 0,
       vy: 0,
       maxSpeed: 125,
+      lastMagnitude: null,
     };
 
     var monstersCaught = 0;
@@ -40,37 +41,39 @@ var MonsterHunter = class {
 
       monster.vx = 0;
       monster.vy = 0;
+
+      var dx = monster.x - hero.x;
+      var dy = monster.y - hero.y;
+
+      monster.lastMagnitude = magnitude({x: dx, y: dy});
     };
 
     // Update game objects
     this.update = function(timeElapsed) {
-      var moving = false;
 
       if (38 in keysDown) { // Player holding up
         hero.y -= hero.speed * timeElapsed;
-        moving = true;
       }
       if (40 in keysDown) { // Player holding down
         hero.y += hero.speed * timeElapsed;
-        moving = true;
       }
       if (37 in keysDown) { // Player holding left
         hero.x -= hero.speed * timeElapsed;
-        moving = true;
       }
       if (39 in keysDown) { // Player holding right
         hero.x += hero.speed * timeElapsed;
-        moving = true;
       }
 
       var dx = monster.x - hero.x;
       var dy = monster.y - hero.y;
 
-      var desiredVelocity = normalize(dx, dy);
-      var steeringVx = (desiredVelocity.x * monster.maxSpeed) - monster.vx;
-      var steeringVy = (desiredVelocity.y * monster.maxSpeed) - monster.vy;
+      var magnitude_ = magnitude({x:dx, y:dy});
 
-      if(moving){
+      if(magnitude_ < monster.lastMagnitude){
+        var desiredVelocity = normalize({x:dx, y:dy});
+        var steeringVx = (desiredVelocity.x * monster.maxSpeed) - monster.vx;
+        var steeringVy = (desiredVelocity.y * monster.maxSpeed) - monster.vy;
+
         monster.vx += steeringVx;
         monster.vy += steeringVy;
 
@@ -83,7 +86,7 @@ var MonsterHunter = class {
         monster.vy = 0;
       }
 
-      monster.x += 256 * timeElapsed;
+      monster.lastMagnitude = magnitude_;
 
       if(monster.x < 32){
         monster.x = 32;
