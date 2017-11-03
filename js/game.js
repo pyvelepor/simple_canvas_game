@@ -33,8 +33,12 @@ monsterImage.src = "images/monster.png";
 var hero = {
 	speed: 256 // movement in pixels per second
 };
-var monster = {};
+var monster = {
+	speed: 125
+};
+
 var monstersCaught = 0;
+var oldDistance = null;
 
 // Handle keyboard controls
 var keysDown = {};
@@ -55,6 +59,15 @@ var reset = function () {
 	// Throw the monster somewhere on the screen randomly
 	monster.x = 32 + (Math.random() * (canvas.width - 64));
 	monster.y = 32 + (Math.random() * (canvas.height - 64));
+	var xDisplacement = monster.x - hero.x;
+  var yDisplacement = monster.y = hero.y;
+
+  // reset the distance between monster and hero
+  oldDistance = Math.sqrt(xDisplacement ** 2 + yDisplacement ** 2);
+
+  //Reset the monsters velocity
+  monster.vx = 0;
+  monster.vy = 0;
 };
 
 // Update game objects
@@ -71,7 +84,63 @@ var update = function (modifier) {
 	if (39 in keysDown) { // Player holding right
 		hero.x += hero.speed * modifier;
 	}
+	var xDisplacement = monster.x - hero.x;
+	var yDisplacement = monster.y - hero.y;
+	var newDistance = Math.sqrt(xDisplacement ** 2 + yDisplacement ** 2);
+	
+	if(newDistance < oldDistance){
+	  //adjust velocity to monsters max speed
+	  var vx = xDisplacement / newDistance * monster.speed;
+	  var vy = yDisplacement / newDistance * monster.speed;
 
+    var xSteering = vx - monster.vx;
+    var ySteering = vy - monster.vy;
+
+    monster.vx += xSteering;
+    monster.vy += ySteering;
+
+    monster.x += monster.vx * modifier;
+    monster.y += monster.vy * modifier;
+	}
+
+	else{
+	  monster.vx = 0;
+	  monster.vy = 0;
+	}
+
+	oldDistance = newDistance;
+
+	if(hero.x < 30){
+		hero.x = 30;
+	}
+
+	if(hero.x > 451){
+		hero.x = 451;
+	}
+
+	if(hero.y < 30){
+		hero.y = 30;
+	}
+
+	if(hero.y > 415){
+		hero.y = 415;
+	}
+
+	if(monster.x < 32){
+    monster.x = 32;
+	}
+
+	if(monster.x > canvas.width - 64){
+	  monster.x = canvas.width - 64;
+	}
+
+	if(monster.y < 32){
+	  monster.y = 32;
+	}
+
+	if(monster.y > canvas.height - 64){
+	  monster.y = canvas.height - 64;
+	}
 	// Are they touching?
 	if (
 		hero.x <= (monster.x + 32)
