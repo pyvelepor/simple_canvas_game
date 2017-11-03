@@ -109,6 +109,22 @@ var MonsterHunter = class {
         monster.y = canvas.height - 64;
       }
 
+      if(hero.x < 30){
+        hero.x = 30;
+      }
+
+      if(hero.x > 451){
+        hero.x = 451;
+      }
+
+      if(hero.y < 30){
+        hero.y = 30;
+      }
+
+      if(hero.y > 415){
+        hero.y = 415;
+      }
+
       // Are they touching?
       if (
         hero.x <= (monster.x + 32)
