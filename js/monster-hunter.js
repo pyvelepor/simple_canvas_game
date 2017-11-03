@@ -3,6 +3,7 @@ var MonsterHunter = class {
   constructor(){
     var canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
+    var oldDistance = null;
 
     //info for loading images
     //name needed later for assigning to an image to the correct variable
@@ -21,7 +22,12 @@ var MonsterHunter = class {
 
     var monster = {
     	x: null,
-    	y: null
+    	y: null,
+      velocity: {
+        x: null,
+        y: null,
+      },
+      maxSpeed: 125,
     };
 
     var monstersCaught = 0;
@@ -34,10 +40,16 @@ var MonsterHunter = class {
     	// Throw the monster somewhere on the screen randomly
     	monster.x = 32 + (Math.random() * (canvas.width - 64));
     	monster.y = 32 + (Math.random() * (canvas.height - 64));
+
+      monster.velocity.x = 0;
+      monster.velocity.y = 0;
+
+      oldDistance = magnitude(displacement(monster, hero));
     };
 
     // Update game objects
     this.update = function(timeElapsed) {
+
       if (38 in keysDown) { // Player holding up
         hero.y -= hero.speed * timeElapsed;
       }
@@ -49,6 +61,52 @@ var MonsterHunter = class {
       }
       if (39 in keysDown) { // Player holding right
         hero.x += hero.speed * timeElapsed;
+      }
+
+      //calculate which direction is "fleeing"
+      var displacement_ = displacement(monster, hero);
+      var newDistance = magnitude(displacement_);
+
+      //only update if the player moved closer to the monster
+      if(newDistance < oldDistance){
+
+        //adjust velocity to monsters max speed
+        var desiredVelocity = normalize(displacement_);
+        desiredVelocity.x *= monster.maxSpeed;
+        desiredVelocity.y *= monster.maxSpeed;
+
+        var steering = displacement(desiredVelocity, monster.velocity);
+
+        monster.velocity.x += steering.x;
+        monster.velocity.y += steering.y;
+
+        console.log(monster.velocity);
+        
+        monster.x += monster.velocity.x * timeElapsed;
+        monster.y += monster.velocity.y * timeElapsed;
+      }
+
+      else{
+        monster.velocity.x = 0;
+        monster.velocity.y = 0;
+      }
+
+      oldDistance = newDistance;
+
+      if(monster.x < 32){
+        monster.x = 32;
+      }
+
+      if(monster.x > canvas.width - 64){
+        monster.x = canvas.width - 64;
+      }
+
+      if(monster.y < 32){
+        monster.y = 32;
+      }
+
+      if(monster.y > canvas.height - 64){
+        monster.y = canvas.height - 64;
       }
 
       if(hero.x < 30){
@@ -65,24 +123,6 @@ var MonsterHunter = class {
 
       if(hero.y > 415){
         hero.y = 415;
-      }
-
-      monster.x += 256 * timeElapsed;
-
-      if(monster.x < 32){
-        monster.x = 32;
-      }
-
-      if(monster.x > canvas.width - 64){
-        monster.x = canvas.width - 64;
-      }
-
-      if(monster.y < 32){
-        monster.y = 32;
-      }
-
-      if(monster.y > canvas.height - 64){
-        monster.y = canvas.height - 64;
       }
 
       // Are they touching?
