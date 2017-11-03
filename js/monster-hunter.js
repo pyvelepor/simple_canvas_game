@@ -3,6 +3,7 @@ var MonsterHunter = class {
   constructor(){
     var canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
+    var oldDistance = null;
 
     //info for loading images
     //name needed later for assigning to an image to the correct variable
@@ -22,10 +23,11 @@ var MonsterHunter = class {
     var monster = {
     	x: null,
     	y: null,
-      vx: 0,
-      vy: 0,
+      velocity: {
+        x: null,
+        y: null,
+      },
       maxSpeed: 125,
-      lastMagnitude: null,
     };
 
     var monstersCaught = 0;
@@ -39,13 +41,10 @@ var MonsterHunter = class {
     	monster.x = 32 + (Math.random() * (canvas.width - 64));
     	monster.y = 32 + (Math.random() * (canvas.height - 64));
 
-      monster.vx = 0;
-      monster.vy = 0;
+      monster.velocity.x = 0;
+      monster.velocity.y = 0;
 
-      var dx = monster.x - hero.x;
-      var dy = monster.y - hero.y;
-
-      monster.lastMagnitude = magnitude({x: dx, y: dy});
+      oldDistance = magnitude(displacement(monster, hero));
     };
 
     // Update game objects
@@ -64,29 +63,35 @@ var MonsterHunter = class {
         hero.x += hero.speed * timeElapsed;
       }
 
-      var dx = monster.x - hero.x;
-      var dy = monster.y - hero.y;
+      //calculate which direction is "fleeing"
+      var displacement_ = displacement(monster, hero);
+      var newDistance = magnitude(displacement_);
 
-      var magnitude_ = magnitude({x:dx, y:dy});
+      //only update if the player moved closer to the monster
+      if(newDistance < oldDistance){
 
-      if(magnitude_ < monster.lastMagnitude){
-        var desiredVelocity = normalize({x:dx, y:dy});
-        var steeringVx = (desiredVelocity.x * monster.maxSpeed) - monster.vx;
-        var steeringVy = (desiredVelocity.y * monster.maxSpeed) - monster.vy;
+        //adjust velocity to monsters max speed
+        var desiredVelocity = normalize(displacement_);
+        desiredVelocity.x *= monster.maxSpeed;
+        desiredVelocity.y *= monster.maxSpeed;
 
-        monster.vx += steeringVx;
-        monster.vy += steeringVy;
+        var steering = displacement(desiredVelocity, monster.velocity);
 
-        monster.x += monster.vx * timeElapsed;
-        monster.y += monster.vy * timeElapsed;
+        monster.velocity.x += steering.x;
+        monster.velocity.y += steering.y;
+
+        console.log(monster.velocity);
+        
+        monster.x += monster.velocity.x * timeElapsed;
+        monster.y += monster.velocity.y * timeElapsed;
       }
 
       else{
-        monster.vx = 0;
-        monster.vy = 0;
+        monster.velocity.x = 0;
+        monster.velocity.y = 0;
       }
 
-      monster.lastMagnitude = magnitude_;
+      oldDistance = newDistance;
 
       if(monster.x < 32){
         monster.x = 32;
